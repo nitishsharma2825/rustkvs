@@ -9,6 +9,7 @@ authors = ["Nitish Sharma sharnit2825@gmail.com"]
 assert_cmd = "0.11.0"
 predicates = "1.0.0"
 clap = { version = "4.5.16", features = ["derive"] }
+failure = "0.1.8"
 
 [dev-dependencies]
 assert_cmd = "0.11.0"
