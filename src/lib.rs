@@ -1,6 +1,5 @@
-use std::{collections::HashMap, error::Error, fmt::Display, fs::{read, File, OpenOptions}, io::{self, BufRead, BufReader, Seek, Write}, path::PathBuf};
-use clap::builder::Str;
-use serde::{de::value, Deserialize, Serialize};
+use std::{collections::HashMap, error::Error, fmt::Display, fs::{read, File, OpenOptions}, io::{self, BufRead, BufReader, Read, Seek, Write}, path::PathBuf};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum MyError {
@@ -66,10 +65,32 @@ impl KvStore {
             .create(true)
             .open(&log_file_path)?;
 
+        let mut store: HashMap<String, u64> = HashMap::new();
+        let mut current_offset = 0;
+
+        let mut reader = BufReader::new(&log_file);
+
+        for line in reader.by_ref().lines() {
+            let line = line?;
+
+            let log_value: LogValue = serde_json::from_str(&line)?;
+
+            match log_value.command_type {
+                CommandType::Set => {
+                    store.insert(log_value.key, current_offset);
+                }
+                CommandType::Rm => {
+                    store.remove(&log_value.key);
+                }
+            }
+
+            current_offset += line.len() as u64 + 1;
+        }
+
         Ok(KvStore {
-            store : HashMap::new(),
-            log_file : log_file,
-            current_offset: 0
+            store,
+            log_file,
+            current_offset
         })
     }
     /// Sets the value of a string key to a string.

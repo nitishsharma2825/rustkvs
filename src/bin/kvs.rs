@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
-use kvs::Result;
-use std::process::exit;
+use kvs::{KvStore, Result};
+use serde::de::value;
+use std::{env::current_dir, process::exit};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -33,18 +34,20 @@ enum Commands {
 
 fn main() -> Result<()> {
     let args = Args::parse();
+    let mut store = KvStore::open(current_dir()?.to_path_buf()).unwrap();
     match &args.command {
         Some(Commands::Get { key }) => {
-            eprintln!("unimplemented");
-            exit(1);
+            let value = store.get(key.clone()).unwrap().unwrap();
+            println!("{value}");
+            Ok(())
         }
         Some(Commands::Set { key, value }) => {
-            eprintln!("unimplemented");
-            exit(1);
+            let value = store.set(key.clone(), value.clone()).unwrap();
+            Ok(())
         }
         Some(Commands::Rm { key }) => {
-            eprintln!("unimplemented");
-            exit(1);
+            let value = store.remove(key.clone()).unwrap();
+            Ok(())
         }
         None => panic!(),
     }
