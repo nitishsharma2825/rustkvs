@@ -106,6 +106,7 @@ impl KvStore {
         let serialized_log_value = serde_json::to_string(&log_value)?;
 
         self.store.insert(key, self.current_offset);
+        self.current_offset += serialized_log_value.len() as u64 + 1;
 
         writeln!(self.log_file, "{}", serialized_log_value)?;
         self.log_file.flush()?;
@@ -135,7 +136,7 @@ impl KvStore {
                 return Ok(None);
             }
         } else {
-            Err(MyError::Other("Key not found".to_string()))
+            Ok(None)
         }
     }
 
@@ -150,6 +151,7 @@ impl KvStore {
             };
 
             let serialized = serde_json::to_string(&log_value)?;
+            self.current_offset += serialized.len() as u64 + 1;
 
             // Write the serialized data to the log file
             writeln!(self.log_file, "{}", serialized)?;

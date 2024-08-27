@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
-use kvs::{KvStore, Result};
-use serde::de::value;
+use kvs::{KvStore, MyError, Result};
 use std::{env::current_dir, process::exit};
 
 #[derive(Parser)]
@@ -37,17 +36,35 @@ fn main() -> Result<()> {
     let mut store = KvStore::open(current_dir()?.to_path_buf()).unwrap();
     match &args.command {
         Some(Commands::Get { key }) => {
-            let value = store.get(key.clone()).unwrap().unwrap();
-            println!("{value}");
-            Ok(())
+            match store.get(key.clone()) {
+                Ok(Some(value)) => {
+                    println!("{value}");
+                    Ok(())
+                },
+                Ok(None) => {
+                    println!("Key not found");
+                    Ok(())
+                },
+                Err(e) => {
+                    println!("Key not found");
+                    Ok(())
+                }
+            }
         }
         Some(Commands::Set { key, value }) => {
             let value = store.set(key.clone(), value.clone()).unwrap();
             Ok(())
         }
         Some(Commands::Rm { key }) => {
-            let value = store.remove(key.clone()).unwrap();
-            Ok(())
+            match store.remove(key.clone()) {
+                Ok(()) => {
+                    Ok(())
+                },
+                Err(e) => {
+                    println!("Key not found");
+                    exit(1)
+                }
+            }
         }
         None => panic!(),
     }

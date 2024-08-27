@@ -1,3 +1,0 @@
-{"command_type":"Set","key":"k1","value":"v1"}
-{"command_type":"Set","key":"k2","value":"v2"}
-{"command_type":"Rm","key":"k1","value":null}
